@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Translator</title>
+  <link id="themeStylesheet" rel="stylesheet" href="styleLight.css">
+  <link rel="shortcut icon" href="https://protranslator.de/wp-content/uploads/2021/11/cropped-cropped-protranslator-multi-09-1.png" type="image/x-icon">
+  <style>
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: url('https://protranslator.de/wp-content/uploads/2021/11/cropped-cropped-protranslator-multi-09-1.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: 50%;
+      align-items: center;
+      transition: background-color 0.5s, color 0.5s;
+    }
+
+    .disabled {
+      background-color: grey;
+      color: #fafafa;
+    }
+
+    .light-mode {
+      color: #4682B4;
+    }
+
+    .dark-mode {
+      color: red;
+    }
+
+    .delete-button {
+      cursor: pointer;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <button onclick="toggleMode()">Toggle Mode</button>
+  <p id="modeText" class="light-mode">Light Mode</p>
+  <div class="container">
+    <input type="text" id="deutschInput" placeholder="deutsches Wort">
+    <br>
+    <br>
+    <input type="text" id="russischInput" placeholder="русское слово">
+    
+    <button id="speichernButton" class="disabled" disabled>Speichern</button>
+  </div>
+
+  <div>
+    <p id="gespeicherteWoerter"></p>
+  </div>
+
+  <script>
+    const themeStylesheet = document.querySelector('#themeStylesheet');
+    const modeText = document.querySelector('#modeText');
+    const gespeicherteWoerterElement = document.querySelector('#gespeicherteWoerter');
+
+    let isDarkMode = false;
+
+    // Lade zuvor gespeicherte Wörter aus dem localStorage
+    let gespeicherteWoerter = JSON.parse(localStorage.getItem('gespeicherteWoerter')) || [];
+
+    // Aktualisiere das <p>-Element mit den gespeicherten Wörtern
+    updateGespeicherteWoerter();
+
+    function toggleMode() {
+      isDarkMode = !isDarkMode;
+      if (isDarkMode) {
+        setDarkMode();
+      } else {
+        setLightMode();
+      }
+    }
+
+    function setLightMode() {
+      themeStylesheet.href = 'styleLight.css';
+      modeText.textContent = 'Light Mode';
+      modeText.className = 'light-mode';
+      document.body.style.backgroundColor = '#ffffff'; // Hintergrundfarbe im Light-Modus
+      document.body.style.color = '#000000'; // Schriftfarbe im Light-Modus
+      updateGespeicherteWoerter();
+    }
+
+    function setDarkMode() {
+      themeStylesheet.href = 'styleDark.css';
+      modeText.textContent = 'Dark Mode';
+      modeText.className = 'dark-mode';
+      document.body.style.backgroundColor = '#1e1e1e'; // Hintergrundfarbe im Dark-Modus
+      document.body.style.color = '#fafafa'; // Schriftfarbe im Dark-Modus
+      updateGespeicherteWoerter();
+    }
+
+    function updateGespeicherteWoerter() {
+      let htmlString = '';
+      gespeicherteWoerter.forEach(wort => {
+        htmlString += `<div>${wort.deutsch} - ${wort.russisch} <span class="delete-button" onclick="deleteWord('${wort.deutsch}')">&#10006;</span></div>`;
+      });
+      gespeicherteWoerterElement.innerHTML = htmlString;
+    }
+
+    function deleteWord(deutsch) {
+      // Finde das Wort im Array und entferne es
+      gespeicherteWoerter = gespeicherteWoerter.filter(wort => wort.deutsch !== deutsch);
+      // Aktualisiere das Anzeige-Element
+      updateGespeicherteWoerter();
+      // Speichere die aktualisierte Liste im localStorage
+      localStorage.setItem('gespeicherteWoerter', JSON.stringify(gespeicherteWoerter));
+    }
+
+    let deutschInput = document.getElementById('deutschInput');
+    let russischInput = document.getElementById('russischInput');
+    let speichernButton = document.getElementById('speichernButton');
+
+    speichernButton.addEventListener('click', function() {
+      gespeicherteWoerter.push({
+        deutsch: deutschInput.value,
+        russisch: russischInput.value
+      });
+
+      // Speichere die aktualisierte Liste im localStorage
+      localStorage.setItem('gespeicherteWoerter', JSON.stringify(gespeicherteWoerter));
+
+      // Leere die Input-Felder
+      deutschInput.value = '';
+      russischInput.value = '';
+
+      // Deaktiviere den Speichern-Button und setze die Farben zurück
+      speichernButton.setAttribute('disabled', true);
+      speichernButton.style.backgroundColor = 'grey';
+
+      // Aktualisiere das <p>-Element mit den gespeicherten Wörtern
+      updateGespeicherteWoerter();
+    });
+
+    // Event-Handler für die Eingabe in den Input-Feldern
+    deutschInput.addEventListener('input', toggleButtonState);
+    russischInput.addEventListener('input', toggleButtonState);
+
+    // Funktion zum Aktivieren/Deaktivieren des Speichern-Buttons
+    function toggleButtonState() {
+      if (deutschInput.value.trim() !== '' && russischInput.value.trim() !== '') {
+        speichernButton.removeAttribute('disabled');
+        speichernButton.style.backgroundColor = 'green';
+      } else {
+        speichernButton.setAttribute('disabled', true);
+        speichernButton.style.backgroundColor = 'grey';
+      }
+    }
+  </script>
+</body>
+</html>
