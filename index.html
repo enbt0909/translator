@@ -4,24 +4,39 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Translator</title>
-  <link id="themeStylesheet" rel="stylesheet" href="styleLight.css">
   <link rel="shortcut icon" href="https://protranslator.de/wp-content/uploads/2021/11/cropped-cropped-protranslator-multi-09-1.png" type="image/x-icon">
+  <link id="themeStylesheet" rel="stylesheet" href="styleLight.css">
   <style>
     body {
       height: 100vh;
       display: flex;
       flex-direction: column;
-      background-image: url('https://protranslator.de/wp-content/uploads/2021/11/cropped-cropped-protranslator-multi-09-1.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: 50%;
+      justify-content: center;
       align-items: center;
       transition: background-color 0.5s, color 0.5s;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    button.green {
+      background-color: green;
+      color: #fafafa;
     }
 
     .disabled {
       background-color: grey;
       color: #fafafa;
+      cursor: not-allowed;
     }
 
     .light-mode {
@@ -32,9 +47,38 @@
       color: red;
     }
 
+    .container {
+      background-color: #f4f4f4;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #gespeicherteWoerter {
+      max-width: 400px;
+      text-align: left;
+    }
+
+    .word-entry {
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
     .delete-button {
       cursor: pointer;
       margin-left: 8px;
+      font-size: 14px;
+      color: red; /* Hinzugefügt: Textfarbe für das Löschen-Symbol */
     }
   </style>
 </head>
@@ -43,11 +87,10 @@
   <button onclick="toggleMode()">Toggle Mode</button>
   <p id="modeText" class="light-mode">Light Mode</p>
   <div class="container">
-    <input type="text" id="deutschInput" placeholder="deutsches Wort">
+    <input type="text" id="deutschInput" placeholder="Deutsches Wort">
     <br>
+    <input type="text" id="russischInput" placeholder="Русское слово">
     <br>
-    <input type="text" id="russischInput" placeholder="русское слово">
-    
     <button id="speichernButton" class="disabled" disabled>Speichern</button>
   </div>
 
@@ -59,6 +102,7 @@
     const themeStylesheet = document.querySelector('#themeStylesheet');
     const modeText = document.querySelector('#modeText');
     const gespeicherteWoerterElement = document.querySelector('#gespeicherteWoerter');
+    const speichernButton = document.getElementById('speichernButton');
 
     let isDarkMode = false;
 
@@ -98,7 +142,11 @@
     function updateGespeicherteWoerter() {
       let htmlString = '';
       gespeicherteWoerter.forEach(wort => {
-        htmlString += `<div>${wort.deutsch} - ${wort.russisch} <span class="delete-button" onclick="deleteWord('${wort.deutsch}')">&#10006;</span></div>`;
+        htmlString += `
+          <div class="word-entry">
+            <span>${wort.deutsch} - ${wort.russisch}</span>
+            <span class="delete-button" onclick="deleteWord('${wort.deutsch}')">&#10006;</span>
+          </div>`;
       });
       gespeicherteWoerterElement.innerHTML = htmlString;
     }
@@ -114,7 +162,6 @@
 
     let deutschInput = document.getElementById('deutschInput');
     let russischInput = document.getElementById('russischInput');
-    let speichernButton = document.getElementById('speichernButton');
 
     speichernButton.addEventListener('click', function() {
       gespeicherteWoerter.push({
@@ -131,7 +178,7 @@
 
       // Deaktiviere den Speichern-Button und setze die Farben zurück
       speichernButton.setAttribute('disabled', true);
-      speichernButton.style.backgroundColor = 'grey';
+      speichernButton.classList.add('disabled');
 
       // Aktualisiere das <p>-Element mit den gespeicherten Wörtern
       updateGespeicherteWoerter();
@@ -145,10 +192,10 @@
     function toggleButtonState() {
       if (deutschInput.value.trim() !== '' && russischInput.value.trim() !== '') {
         speichernButton.removeAttribute('disabled');
-        speichernButton.style.backgroundColor = 'green';
+        speichernButton.classList.add('green');
       } else {
         speichernButton.setAttribute('disabled', true);
-        speichernButton.style.backgroundColor = 'grey';
+        speichernButton.classList.remove('green');
       }
     }
   </script>
